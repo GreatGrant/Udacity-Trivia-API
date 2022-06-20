@@ -1,3 +1,5 @@
+from hashlib import new
+import json
 import os
 from unicodedata import category
 from flask import Flask, request, abort, jsonify
@@ -9,8 +11,9 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+
 def paginate_questions(request, selection):
-    page = request.args.get('page', 1, type=int)
+    page = request.args.get("page", 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
 
@@ -18,6 +21,7 @@ def paginate_questions(request, selection):
     current_questions = questions[start:end]
 
     return current_questions
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -31,6 +35,7 @@ def create_app(test_config=None):
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
     """
+
     @app.after_request
     def after_request(response):
         response.headers.add(
@@ -41,26 +46,29 @@ def create_app(test_config=None):
         )
         return response
 
-    
     """
     @TODO:
     Create an endpoint to handle GET requests
     for all available categories.
     """
+
     @app.route("/categories")
     def get_categories():
         categories = Category.query.all()
 
         try:
-            return jsonify({
-                "success": True,
-                "categories": {category.id:category.type for category in categories},
-                "total_categories": len(categories)
-            })
+            return jsonify(
+                {
+                    "success": True,
+                    "categories": {
+                        category.id: category.type for category in categories
+                    },
+                    "total_categories": len(categories),
+                }
+            )
 
         except:
             abort(404)
-
 
     """
     @TODO:
@@ -74,25 +82,27 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
+
     @app.route("/questions")
     def get_questions():
         questions = Question.query.order_by(Question.id).all()
-        categories  = Category.query.order_by(Category.id).all()
+        categories = Category.query.order_by(Category.id).all()
 
         if len(categories) == 0:
             abort(404)
 
-        paginated_questions = paginate_questions(request, selection = questions)
-    
-        return jsonify({
+        paginated_questions = paginate_questions(request, selection=questions)
+
+        return jsonify(
+            {
                 "success": True,
                 "questions": paginated_questions,
                 "total_questions": len(questions),
                 "categories": {category.id: category.type for category in categories},
                 "current_category": categories[0].type,
                 "success": True,
-        })
-        
+            }
+        )
 
     """
     @TODO:
@@ -101,10 +111,12 @@ def create_app(test_config=None):
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
+
     @app.route("/questions/<int:question_id>", methods=["DELETE"])
     def delete_questions(question_id):
         question_to_delete = Question.query.filter(
-            Question.id == question_id).one_or_none()
+            Question.id == question_id
+        ).one_or_none()
         questions = Question.query.order_by(Question.id).all()
         try:
             if question_to_delete is None:
@@ -113,17 +125,16 @@ def create_app(test_config=None):
             question_to_delete.delete()
             paginated_questions = paginate_questions(request, selection=questions)
 
-            return jsonify({
-                "success": True,
-                "deleted": question_id,
-                "questions": paginated_questions,
-                "total_questions": len(questions)
-
-            })
+            return jsonify(
+                {
+                    "success": True,
+                    "deleted": question_id,
+                    "questions": paginated_questions,
+                    "total_questions": len(questions),
+                }
+            , )
         except:
             abort(404)
-        
-
 
     """
     @TODO:
@@ -135,6 +146,41 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
+
+    @app.route("/questions", methods=["POST"])
+    def create_question():
+        body = request.get_json()
+
+        new_question = body.get("question", "")
+        new_answer = body.get("answer", "")
+        new_category = body.get("category", 1)
+        new_difficulty = body.get("difficulty", 1)
+
+        if new_question == "" or new_answer == "":
+            abort(422)
+
+        try:
+            question = Question(
+                question=new_question,
+                answer=new_answer,
+                category=new_category,
+                difficulty=new_difficulty,
+            )
+
+            question.insert()
+
+            questions = question.query.order_by(Question.id).all()
+            paginated_questions = paginate_questions(request, selection=questions)
+
+            return jsonify({
+                "success": True,
+                "created": question.id,
+                "questions": paginated_questions,
+                "total_questions": len(questions),
+            }), 201
+        except:
+            abort(422)
+            
 
     """
     @TODO:
@@ -175,4 +221,3 @@ def create_app(test_config=None):
     """
 
     return app
-
