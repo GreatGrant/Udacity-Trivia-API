@@ -2,6 +2,7 @@ import os
 import re
 import unittest
 import json
+from urllib import response
 from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
@@ -16,8 +17,15 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia_test"
+        self.new_question = {
+            "question": "this is a sample question",
+            "answer": "This is a sample answer",
+            "difficulty": 1,
+            "category": 1,
+        }
         self.database_path = "postgresql://{}:{}@{}/{}".format(
-            'postgres', 'postgres', 'localhost:5432', self.database_name)
+            "postgres", "postgres", "localhost:5432", self.database_name
+        )
         setup_db(self.app, self.database_path)
 
         # binds the app to the current context
@@ -26,7 +34,7 @@ class TriviaTestCase(unittest.TestCase):
             self.db.init_app(self.app)
             # create all tables
             self.db.create_all()
-    
+
     def tearDown(self):
         """Executed after reach test"""
         pass
@@ -35,8 +43,9 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
+
     def test_get_questions(self):
-        response = self.client().get('/questions')
+        response = self.client().get("/questions")
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
@@ -46,6 +55,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data["questions"])
         self.assertTrue(len(data["questions"]), 10)
 
+    # def test_404_sent_requesting_beyond_valid_page(self):
+    #     response = self.client().get("questions/10000")
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 404)
+    #     self.assertEqual(data["success"], False)
+    #     self.assertEqual(data["message"], "resource not found")
+
     def test_get_categories(self):
         response = self.client().get("/categories")
         data = json.loads(response.data)
@@ -54,16 +71,25 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data["success"])
         self.assertTrue(data["categories"])
         self.assertEqual(data["total_categories"], 6)
-    
-    def test_delete_question(self):
-        response = self.client().delete("questions/23")
+
+    # def test_delete_question(self):
+    #     response = self.client().delete("questions/23")
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertEqual(data["deleted"], 23)
+    #     self.assertTrue(data["questions"])
+    #     self.assertTrue(data["total_questions"])
+
+    def test_create_question(self):
+        response = self.client().post("/questions", json = self.new_question)
         data = json.loads(response.data)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         self.assertEqual(data["success"], True)
-        self.assertEqual(data["deleted"], 23)
-        self.assertTrue(data["questions"])
         self.assertTrue(data["total_questions"])
+        self.assertTrue(len(data["questions"]))
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

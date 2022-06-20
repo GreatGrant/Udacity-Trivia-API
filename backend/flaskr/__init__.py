@@ -131,8 +131,8 @@ def create_app(test_config=None):
                     "deleted": question_id,
                     "questions": paginated_questions,
                     "total_questions": len(questions),
-                }
-            , )
+                },
+            )
         except:
             abort(404)
 
@@ -172,15 +172,19 @@ def create_app(test_config=None):
             questions = question.query.order_by(Question.id).all()
             paginated_questions = paginate_questions(request, selection=questions)
 
-            return jsonify({
-                "success": True,
-                "created": question.id,
-                "questions": paginated_questions,
-                "total_questions": len(questions),
-            }), 201
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "created": question.id,
+                        "questions": paginated_questions,
+                        "total_questions": len(questions),
+                    }
+                ),
+                201,
+            )
         except:
             abort(422)
-            
 
     """
     @TODO:
