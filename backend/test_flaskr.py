@@ -1,4 +1,5 @@
 import os
+import re
 import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
@@ -45,6 +46,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data["questions"])
         self.assertTrue(len(data["questions"]), 10)
 
+    def test_get_categories(self):
+        response = self.client().get("/categories")
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data["success"])
+        self.assertTrue(data["categories"])
+        self.assertEqual(data["total_categories"], 6)
 
 
 # Make the tests conveniently executable
