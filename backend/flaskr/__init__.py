@@ -1,4 +1,5 @@
 import os
+from unicodedata import category
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -7,6 +8,16 @@ import random
 from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
+
+def paginate_questions(request, selection):
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+
+    questions = [question.format() for question in selection]
+    current_questions = questions[start:end]
+
+    return current_questions
 
 def create_app(test_config=None):
     # create and configure the app
@@ -38,18 +49,17 @@ def create_app(test_config=None):
     """
     @app.route("/categories")
     def get_categories():
-        try:
-            categories = Category.query.all()
+        categories = Category.query.all()
 
+        try:
             return jsonify({
-                "categories": {category.id:category.type for category in categories},
                 "success": True,
+                "categories": {category.id:category.type for category in categories},
                 "total_categories": len(categories)
             })
 
-
         except:
-            abort(400)
+            abort(404)
 
 
     """
@@ -64,6 +74,23 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
+    @app.route("/questions")
+    def get_questions():
+        questions = Question.query.order_by(Question.id).all()
+        categories  = Category.query.order_by(Category.id).all()
+
+        if len(categories) == 0:
+            abort(404)
+
+        paginated_questions = paginate_questions(request, selection = questions)
+    
+        return jsonify({
+                "questions": paginated_questions,
+                "total_questions": len(questions),
+                "categories": {category.id: category.type for category in categories},
+                "current_category": categories[0].type
+        })
+        
 
     """
     @TODO:
