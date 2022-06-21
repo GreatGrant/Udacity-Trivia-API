@@ -107,7 +107,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertNotEqual(len(data["questions"]), 0)
-        self.assertEqual(data["current_category"], "Science")
+        self.assertEqual(data["current_category"], 1)
 
 
 # Make the tests conveniently executable
