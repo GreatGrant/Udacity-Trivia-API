@@ -93,12 +93,22 @@ class TriviaTestCase(unittest.TestCase):
     #     self.assertTrue(len(data["questions"]))
 
     def test_search_question(self):
-        response = self.client().post("/questions/search", json = self.search_term)
+        response = self.client().post("/questions/search", json=self.search_term)
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(len(data['questions']), 1)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(len(data["questions"]), 1)
+
+    def test_retrieve_questions_by_category(self):
+        response = self.client().get("/categories/1/questions")
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertNotEqual(len(data["questions"]), 0)
+        self.assertEqual(data["current_category"], "Science")
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

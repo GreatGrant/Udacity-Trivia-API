@@ -197,27 +197,33 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-    @app.route("/questions/search", methods=['POST'])
+
+    @app.route("/questions/search", methods=["POST"])
     def search_question():
         search_term = request.get_json().get("searchTerm", "")
 
         if search_term == "":
             abort(404)
-        
-        search_result = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
+
+        search_result = Question.query.filter(
+            Question.question.ilike(f"%{search_term}%")
+        ).all()
         if len(search_result) == 0:
             abort(404)
 
         paginated_result = paginate_questions(request, selection=search_result)
 
-        return jsonify({
-                "success": True,
-                "questions": paginated_result,
-                "total_questions": len(search_result),
-            }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "questions": paginated_result,
+                    "total_questions": len(search_result),
+                }
+            ),
+            200,
+        )
         abort(404)
-
-
 
     """
     @TODO:
@@ -227,27 +233,34 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
-    @app.route('/categories/<int:category_id>/questions')
-    def retrieve_questions_by_category(category_id):
-        category = Category.query.filter_by(Category.id ==category_id).one_or_none()
 
-        if (category is None):
+    @app.route("/categories/<int:category_id>/questions")
+    def retrieve_questions_by_category(category_id):
+        category = Category.query.filter_by(
+            Category.id == category_id
+        ).one_or_none()
+
+        if category is None:
             abort(422)
 
-        questions_by_category = Question.query.filter_by(Question.category == category_id).all()
+        questions_by_category = Question.query.filter_by(
+            Question.category == category_id
+        ).all()
 
         # paginate questions
         paginated_questions = paginate_questions(
-            request, selection = questions_by_category)
+            request, selection=questions_by_category
+        )
 
         # return the results
-        return jsonify({
-            'success': True,
-            'questions': paginated_questions,
-            'total_questions': len(questions_by_category),
-            'current_category': category.type
-        })
-
+        return jsonify(
+            {
+                "success": True,
+                "questions": paginated_questions,
+                "total_questions": len(questions_by_category),
+                "current_category": category.type,
+            }
+        )
 
     """
     @TODO:
