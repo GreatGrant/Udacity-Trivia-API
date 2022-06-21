@@ -24,6 +24,14 @@ class TriviaTestCase(unittest.TestCase):
             "category": 1,
         }
         self.search_term = {"searchTerm": "invented peanut butter"}
+        self.quiz_data = {
+            'previous_questions': [3, 7],
+            'quiz_category': {
+                'type': 'Entertainment',
+                'id': 5
+            }
+        }
+
         self.database_path = "postgresql://{}:{}@{}/{}".format(
             "postgres", "postgres", "localhost:5432", self.database_name
         )
@@ -108,6 +116,26 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], True)
         self.assertNotEqual(len(data["questions"]), 0)
         self.assertEqual(data["current_category"], 1)
+
+    def test_play_quiz(self):
+        response = self.client().post('/quizzes', json=self.quiz_data)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['question'])
+        self.assertNotEqual(data['question']['id'], 3)
+        self.assertNotEqual(data['question']['id'], 7)
+        self.assertEqual(data['question']['category'], 5)
+
+    def test_empty_data_to_play_quiz(self):
+        response = self.client().post('/quizzes', json={})
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'unprocessable')
+
 
 
 # Make the tests conveniently executable
