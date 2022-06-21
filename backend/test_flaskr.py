@@ -23,6 +23,7 @@ class TriviaTestCase(unittest.TestCase):
             "difficulty": 1,
             "category": 1,
         }
+        self.search_term = {"searchTerm": "invented peanut butter"}
         self.database_path = "postgresql://{}:{}@{}/{}".format(
             "postgres", "postgres", "localhost:5432", self.database_name
         )
@@ -44,16 +45,16 @@ class TriviaTestCase(unittest.TestCase):
     Write at least one test for each test for successful operation and for expected errors.
     """
 
-    def test_get_questions(self):
-        response = self.client().get("/questions")
-        data = json.loads(response.data)
+    # def test_get_questions(self):
+    #     response = self.client().get("/questions")
+    #     data = json.loads(response.data)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["success"], True)
-        self.assertTrue(data["questions"])
-        self.assertTrue(data["total_questions"])
-        self.assertTrue(data["questions"])
-        self.assertTrue(len(data["questions"]), 10)
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertTrue(data["questions"])
+    #     self.assertTrue(data["total_questions"])
+    #     self.assertTrue(data["questions"])
+    #     self.assertTrue(len(data["questions"]), 10)
 
     # def test_404_sent_requesting_beyond_valid_page(self):
     #     response = self.client().get("questions/10000")
@@ -63,14 +64,14 @@ class TriviaTestCase(unittest.TestCase):
     #     self.assertEqual(data["success"], False)
     #     self.assertEqual(data["message"], "resource not found")
 
-    def test_get_categories(self):
-        response = self.client().get("/categories")
-        data = json.loads(response.data)
+    # def test_get_categories(self):
+    #     response = self.client().get("/categories")
+    #     data = json.loads(response.data)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(data["success"])
-        self.assertTrue(data["categories"])
-        self.assertEqual(data["total_categories"], 6)
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertTrue(data["success"])
+    #     self.assertTrue(data["categories"])
+    #     self.assertEqual(data["total_categories"], 6)
 
     # def test_delete_question(self):
     #     response = self.client().delete("questions/23")
@@ -82,14 +83,22 @@ class TriviaTestCase(unittest.TestCase):
     #     self.assertTrue(data["questions"])
     #     self.assertTrue(data["total_questions"])
 
-    def test_create_question(self):
-        response = self.client().post("/questions", json = self.new_question)
+    # def test_create_question(self):
+    #     response = self.client().post("/questions", json = self.new_question)
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertTrue(data["total_questions"])
+    #     self.assertTrue(len(data["questions"]))
+
+    def test_search_question(self):
+        response = self.client().post("/questions/search", json = self.search_term)
         data = json.loads(response.data)
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(data["success"], True)
-        self.assertTrue(data["total_questions"])
-        self.assertTrue(len(data["questions"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(len(data['questions']), 1)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
