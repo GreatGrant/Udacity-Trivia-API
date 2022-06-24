@@ -199,10 +199,10 @@ def create_app(test_config=None):
             questions = paginate_questions(request, questions_selection)
 
             return jsonify({
-                'success': True,
-                'questions': questions,
-                'total_questions': len(questions_selection),
-                'current_category': category.type
+                "success": True,
+                "questions": questions,
+                "total_questions": len(questions_selection),
+                "current_category": category.type
             })
         except:
             abort(404)
