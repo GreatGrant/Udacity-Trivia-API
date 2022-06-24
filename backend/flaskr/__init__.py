@@ -167,9 +167,9 @@ def create_app(test_config=None):
     
 
                 return jsonify({
-                    'success': True,
-                    'questions': paginated_result,
-                    'total_questions': len(search_result)
+                    "success": True,
+                    "questions": paginated_result,
+                    "total_questions": len(search_result)
                 })
             else:
                 question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
@@ -182,6 +182,7 @@ def create_app(test_config=None):
                     "success": True,
                     "created": question.id,
                     "questions": paginated_questions,
+                    "total_questions": len(questions)
                 }), 201
         except:
             abort(422)    
