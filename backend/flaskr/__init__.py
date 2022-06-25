@@ -72,7 +72,8 @@ def create_app(test_config=None):
                 "success": True,
                 "questions": current_questions,
                 "total_questions": len(questions),
-                "categories": {category.id: category.type for category in categories},
+                "categories": {
+                    category.id: category.type for category in categories},
                 "current_category": categories[0].type,
                 "success": True,
             }
@@ -120,7 +121,8 @@ def create_app(test_config=None):
                 search_result = Question.query.filter(
                     Question.question.ilike(f"%{search_term}%")
                 ).all()
-                current_result = paginate_questions(request, selection=search_result)
+                current_result = paginate_questions(
+                    request, selection=search_result)
 
                 return jsonify(
                     {
@@ -138,8 +140,11 @@ def create_app(test_config=None):
                 )
                 question.insert()
 
-                questions = question.query.order_by(Question.id).all()
-                current_questions = paginate_questions(request, selection=questions)
+                questions = question.query.order_by(
+                    Question.id
+                    ).all()
+                current_questions = paginate_questions(
+                    request, selection=questions)
 
                 return (
                     jsonify(
@@ -158,7 +163,8 @@ def create_app(test_config=None):
     @app.route("/categories/<int:category_id>/questions")
     def get_questions_by_category(category_id):
         try:
-            category = Category.query.filter(Category.id == category_id).one_or_none()
+            category = Category.query.filter(
+                Category.id == category_id).one_or_none()
 
             if category is None:
                 abort(404)
@@ -216,7 +222,9 @@ def create_app(test_config=None):
             if category["type"] == "click":
                 questions = Question.query.all()
             else:
-                questions = Question.query.filter_by(category=category["id"]).all()
+                questions = Question.query.filter_by(
+                    category=category["id"]
+                    ).all()
             # generate random questions
             random_questions = (
                 questions[random.randrange(0, len(questions))].format()
@@ -237,30 +245,42 @@ def create_app(test_config=None):
     @app.errorhandler(404)
     def not_found(error):
         return (
-            jsonify({"success": False, "error": 404, "message": "Resource Not Found"}),
-            404,
-        )
+            jsonify({
+                "success": False,
+                "error": 404,
+                "message": "Resource Not Found"}),
+            404,)
 
     @app.errorhandler(422)
     def unprocessable(error):
         return (
-            jsonify({"success": False, "error": 422, "message": "unprocessable"}),
+            jsonify({
+                "success": False,
+                "error": 422,
+                "message": "unprocessable"
+                }),
             422,
         )
 
     @app.errorhandler(400)
     def bad_request(error):
         return (
-            jsonify({"success": False, "error": 400, "message": "bad request"}),
+            jsonify({
+                "success": False,
+                "error": 400,
+                "message": "bad request"
+                }),
             400,
         )
 
     @app.errorhandler(500)
     def bad_request(error):
         return (
-            jsonify(
-                {"success": False, "error": 500, "message": "Internal server error"}
-            ),
+            jsonify({
+                "success": False,
+                "error": 500,
+                "message": "Internal server error"
+                }),
             500,
         )
 
